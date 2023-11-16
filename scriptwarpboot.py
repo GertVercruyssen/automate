@@ -176,11 +176,11 @@ def nextaction():
                 if cloaked == True and sum(screenimage.getpixel((2303,816))) > 855: #object selected
                     actionlist.insert(1,"warpnext")
                     actionlist.insert(2,"waituntildocked")
-                    waitticker = 0
+                    waitdockticker = 0
                 else:
                     actionlist.insert(1,"waituntildocked")
                     waitdockticker = waitdockticker+1
-                    print('waitdockticker: {}'.format(waitdockticker))
+                    #print('waitdockticker: {}'.format(waitdockticker))
             if waitdockticker > 300: #if nothing happens for some time then autopilot
                 print('failsafe engaged: unstuck with autopilot !')
                 pyautogui.keyDown('ctrl')
@@ -197,7 +197,6 @@ def nextaction():
         elif currentaction == "warpnext":
             pyautogui.moveTo(1178, 406)
             pyautogui.click()
-            waitticker = 0
             time.sleep(5)
         elif currentaction == "readmissiontitle":
             pyautogui.moveTo(960, 402)
@@ -244,7 +243,6 @@ def nextaction():
             time.sleep(5)
             pyautogui.moveTo(1131, 489) #select fomething un the overview just to be safe
             pyautogui.click()
-            waitticker = 0
         else:
             print('Error: undefined action on the action queue')
             print(currentaction)

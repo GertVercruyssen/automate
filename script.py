@@ -35,7 +35,7 @@ def main():
         deltat=time.time()-last_time
         #print('Loop took {} seconds'.format(deltat))
         last_time = time.time()
-        if (last_time - starttime) > 7200: #after how many seconds should this quit?
+        if (last_time - starttime) > 10800: #after how many seconds should this quit?
             timetoquit = True
             
         whitepixel = (255, 255, 255, 255)

@@ -39,19 +39,21 @@ def main():
         last_time = time.time()
         if (last_time - starttime) > 10800: #after how many seconds should this quit?
             timetoquit = True
-            
-        whitepixel = (255, 255, 255, 255)
-        if whitepixel == screenimage.getpixel((1783,1747)) and whitepixel == screenimage.getpixel((1778,1760)) and whitepixel == screenimage.getpixel((1789,1760)):
+                        
+        toprightpixel = (213, 215, 216, 255)
+        toprightpixelselected = (214, 214, 214, 255)
+        if toprightpixel == screenimage.getpixel((2833,660)) or toprightpixelselected == screenimage.getpixel((2833,660)):
             #print('you are undocked')
             undocked = True
         else:
             undocked = False
-        
-        stationmenupixel = (23, 23, 23, 255)
-        stationmenuactivepixel = (21, 23, 25, 255)
-        if ((stationmenupixel == screenimage.getpixel((2511,1526)) and stationmenupixel == screenimage.getpixel((2855,1526))) or (stationmenuactivepixel == screenimage.getpixel((2511,1526)) and stationmenuactivepixel == screenimage.getpixel((2855,1526)))) and ( stationmenupixel != screenimage.getpixel((2511,1530)) and stationmenupixel != screenimage.getpixel((2855,1530))):
-            #print('you are docked')
-            docked = True
+            
+        if not undocked :
+            if toprightpixel == screenimage.getpixel((2843,672)) or toprightpixelselected == screenimage.getpixel((2843,672)):
+                #print('you are docked')
+                docked = True
+            else:
+                docked = False
         else:
             docked = False
         
@@ -67,7 +69,7 @@ def main():
             print('time limit reached: quitting the game')
             pyautogui.press('esc')
             sleep(5)
-            pyautogui.moveTo(1219, 803)
+            pyautogui.moveTo(819, 872)
             pyautogui.click()
             finished = True
         else:
@@ -114,10 +116,10 @@ def nextaction():
             pyautogui.moveTo(649, 771)
             pyautogui.click()
         elif currentaction == "acceptmission":
-            pyautogui.moveTo(871, 760)
+            pyautogui.moveTo(817, 760)
             pyautogui.click()
         elif currentaction == "closeconvo":
-            pyautogui.moveTo(1193, 379)
+            pyautogui.moveTo(1152, 382)
             pyautogui.click()
         elif currentaction == "pressbluebutton":
             pyautogui.moveTo(642, 598)
@@ -161,14 +163,13 @@ def nextaction():
             pyautogui.keyUp('ctrl')
         elif currentaction == "waituntildocked":
             if docked == False:
-                actionlist.insert(0,"wait25")
-                if cloaked == True and ((213, 213, 213, 255) == screenimage.getpixel((2303,816)) or (209, 211, 213, 255) == screenimage.getpixel((2303,816))): #object selected
+                actionlist.insert(0,"wait1")
+                if cloaked == True and sum(screenimage.getpixel((2303,816))) > 855: #object selected
                     actionlist.insert(1,"warpnext")
                     actionlist.insert(2,"waituntildocked")
                 else:
                     actionlist.insert(1,"waituntildocked")
         elif currentaction == "warpnext":
-            time.sleep(1)
             pyautogui.moveTo(1178, 406)
             pyautogui.click()
             time.sleep(5)
@@ -200,7 +201,7 @@ def nextaction():
             actionlist.insert(8,"closeconvo")
         elif currentaction == "completemission":
             time.sleep(1)
-            pyautogui.moveTo(832, 761)
+            pyautogui.moveTo(767, 761)
             pyautogui.click()
             time.sleep(1)
         elif currentaction == "warpstart":
@@ -208,8 +209,12 @@ def nextaction():
             pyautogui.moveTo(566, 495)
             pyautogui.click(button='right')
             time.sleep(1)
-            pyautogui.moveTo(589, 507)
-            pyautogui.click()
+            if (144, 228, 106, 255) == screenimage.getpixel((1250,949)):
+                pyautogui.moveTo(586, 535)
+                pyautogui.click()
+            else:
+                pyautogui.moveTo(589, 507)
+                pyautogui.click()
             time.sleep(5)
             
         else:
@@ -222,7 +227,7 @@ def nextaction():
 def plannextactions():
     if docked == True:
         location = readMapLocation()
-        if location == "<url=showinfo:1531//60000286 alt='Current Station'>Jatate III - Moon 10 - Prompt Delivery Storage</url>":
+        if location == "<url=showinfo:1531//60000289 alt='Current Station'>Jatate IV - Moon 17 - Prompt Delivery Storage</url>":
             formatted_time = datetime.datetime.now().strftime('%H:%M')
             print(formatted_time + " starting new mission plan")
             if (121, 157, 72, 255) == screenimage.getpixel((1439,1446)): #agent mission already accepted
