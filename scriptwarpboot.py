@@ -14,8 +14,9 @@ import sys
 def main(boot):
     if boot == "b":
         booteve()
-        formatted_time = datetime.datetime.now().strftime('%H:%M')
-        print(formatted_time + " starting mission running")
+        
+    formatted_time = datetime.datetime.now().strftime('%H:%M')
+    print(formatted_time + " starting mission running")
     
     global docked
     docked = False
@@ -141,7 +142,7 @@ def nextaction():
             pyautogui.keyDown('optionleft')
             pyautogui.press('g')
             pyautogui.keyUp('optionleft')
-            time.sleep(1)
+            time.sleep(3)
             pyautogui.moveTo(896, 661)
             pyautogui.dragTo(908, 544, button='left')
             time.sleep(1)
@@ -213,7 +214,8 @@ def nextaction():
             time.sleep(1)
             pyautogui.moveTo(1106, 511)
             pyautogui.click()
-            actionlist.insert(0,"collectcargo")
+            time.sleep(3)
+            actionlist.insert(0,"checkroute")
         elif currentaction == "startmission":
             actionlist.insert(0,"undock")
             actionlist.insert(1,"waituntilundocked")
@@ -224,6 +226,12 @@ def nextaction():
             actionlist.insert(6,"completemission")
             actionlist.insert(7,"wait25")
             actionlist.insert(8,"closeconvo")
+            actionlist.insert(9,"wait25")
+            actionlist.insert(10,"setdestinationagent")
+            actionlist.insert(11,"undock")
+            actionlist.insert(12,"waituntilundocked")
+            actionlist.insert(13,"warpstart")
+            actionlist.insert(14,"waituntildocked")
         elif currentaction == "completemission":
             time.sleep(1)
             pyautogui.moveTo(767, 761)
@@ -243,6 +251,12 @@ def nextaction():
             time.sleep(5)
             pyautogui.moveTo(1131, 489) #select fomething un the overview just to be safe
             pyautogui.click()
+        elif currentaction == "checkroute":
+            route = checkforjumpword()
+            if route:
+                actionlist.insert(0,"collectcargo")
+            else:
+                actionlist.insert(0,"prepmission")
         else:
             print('Error: undefined action on the action queue')
             print(currentaction)
@@ -280,9 +294,6 @@ def plannextactions():
                 actionlist.append("closeconvo")
                 actionlist.append("wait25")
                 actionlist.append("startmission")
-                
-            #offeredpixel = (214, 154, 63, 255)
-            #if offeredpixel == screenimage.getpixel((2837,1213)):
                 
         else:
             print('at some random station? going home to agent')
@@ -329,7 +340,9 @@ def getClipboard():
     return pbstring
 
 def booteve():
-    waituntilevening()
+    formatted_time = datetime.datetime.now().strftime('%H:%M')
+    print(formatted_time + " i have awoken!")
+    #waituntilevening() //didn't work, use cron job that starts in the evening
     #open eve launcher
     pyautogui.keyDown('command')
     pyautogui.press('space')
@@ -367,6 +380,22 @@ def waituntilevening():
     seconds = (future-t).total_seconds()
     print('waiting {} seconds to start the show'.format(seconds))
     time.sleep(seconds)
+    
+def checkforjumpword():
+    y = 788
+    first = sum(screenimage.getpixel((1211,y))) - 255 #dark
+    second = sum(screenimage.getpixel((1213,y))) - 255 #white
+    third = sum(screenimage.getpixel((1214,y))) - 255 #dark
+    fourth = sum(screenimage.getpixel((1216,y))) - 255 #white
+    fifth = sum(screenimage.getpixel((1218,y))) - 255 #dark
+    sixth = sum(screenimage.getpixel((1220,y))) - 255 #white
+    seventh = sum(screenimage.getpixel((1221,y))) - 255 #dark
+    eighth = sum(screenimage.getpixel((1223,y))) - 255 #white
+    
+    if first < second and second > third and third < fourth and fourth > fifth and fifth < sixth and sixth > seventh and seventh < eighth:
+        return True
+    else:
+        return False
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
