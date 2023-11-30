@@ -38,10 +38,13 @@ def main(boot):
     waitdockticker = 0
     global screenimage
     global missiontitle
-    global loopedsetdestination = 0 #counter to check if stuck on loop
-    global candecline = True #only once per run of the program
+    global loopedsetdestination
+    loopedsetdestination = 0 #counter to check if stuck on loop
+    global candecline
+    candecline = True #only once per run of the program
     last_time = time.time()
-    global timetoquit = False
+    global timetoquit
+    timetoquit = False
     finished = False
     starttime = last_time
     pyautogui.moveTo(953,516)
@@ -267,7 +270,7 @@ def nextaction():
                 if loopedsetdestination > 4: #stuck in a loop, probably trying to go to lowsec
                     loopedsetdestination = 0
                     if candecline:
-                        #decline and clear convo, actionlist (soft reset)
+                        output('declining. Resetting the convo and actionlist')
                         candecline = False
                         pyautogui.moveTo(962, 885)
                         time.sleep(1)
@@ -280,6 +283,7 @@ def nextaction():
                         pyautogui.click()
                         actionlist = ["wait1"]
                     else:
+                        output('No decline available, quitting game')
                         actionlist = ["wait1"]
                         timetoquit = True
                 else:
