@@ -40,8 +40,8 @@ def main(boot):
     global missiontitle
     global loopedsetdestination
     loopedsetdestination = 0 #counter to check if stuck on loop
-    global candecline
-    candecline = True #only once per run of the program
+    global loopedwaitundocked
+    loopedwaitundocked = 0 #counter to check if stuck on undock
     last_time = time.time()
     global timetoquit
     timetoquit = False
@@ -88,6 +88,14 @@ def main(boot):
             pyautogui.moveTo(515, 304)
             sleep(1)
             pyautogui.click()
+            sleep(5)
+            #minimize launcher
+            output('minimize launcher')
+            pyautogui.moveTo(1318, 17)
+            time.sleep(2)
+            pyautogui.click()
+            time.sleep(2)
+            pyautogui.click()
             finished = True
         else:
             #output('mouse is at position: {}'.format(pyautogui.position()))
@@ -108,8 +116,8 @@ def nextaction():
     global screenimage
     global actionlist
     global loopedsetdestination
-    global candecline
     global timetoquit
+    global loopedwaitundocked
     
     if len(actionlist) > 0:
         currentaction = actionlist[0]
@@ -128,8 +136,26 @@ def nextaction():
             waittimer = 1.0
         elif currentaction == "waituntilundocked":
             if undocked == False:
-                actionlist.insert(0,"waituntilundocked")
-                actionlist.insert(0,"wait5")
+                if loopedwaitundocked > 40:
+                    output('failsafe, not undocking')
+                    takeScreenshot('failsafe')
+                    #close the warning message in the center of the screen if there
+                    if (42, 60, 70, 255) == screenimage.getpixel((1752,1338)):
+                        pyautogui.moveTo(1028, 670)
+                        pyautogui.moveTo(1029, 670)
+                        pyautogui.click()
+                    resetMenus()
+                    sleep(3)
+                    pyautogui.moveTo(968, 429)
+                    pyautogui.click()
+                    actionlist = ["wait1"]
+                    actionlist.insert(0,"collectcargo")
+                    actionlist.insert(0,"wait5")
+                    loopedwaitundocked = 0
+                else:
+                    actionlist.insert(0,"waituntilundocked")
+                    actionlist.insert(0,"wait5")
+                    loopedwaitundocked = loopedwaitundocked+1
         elif currentaction == "startconvo":
             pyautogui.moveTo(626, 750)
             pyautogui.click(button='right')
@@ -273,25 +299,12 @@ def nextaction():
             if not route:
                 actionlist.insert(0,"setmissionroute")
                 loopedsetdestination = loopedsetdestination+1
-                if loopedsetdestination > 4: #stuck in a loop, probably trying to go to lowsec
+                if loopedsetdestination > 4: #stuck in a loop, stuck on menus?
                     loopedsetdestination = 0
-                    if candecline:
-                        output('declining. Resetting the convo and actionlist')
-                        candecline = False
-                        pyautogui.moveTo(962, 885)
-                        time.sleep(1)
-                        takeScreenshot('declined')
-                        time.sleep(1)
-                        pyautogui.click()
-                        time.sleep(10)
-                        pyautogui.moveTo(980, 337)
-                        time.sleep(1)
-                        pyautogui.click()
-                        actionlist = ["wait1"]
-                    else:
-                        output('No decline available, quitting game')
-                        actionlist = ["wait1"]
-                        timetoquit = True
+                    output('failsafe, cant set destination')
+                    takeScreenshot('failsafe')
+                    resetMenus()
+                    actionlist = ["wait1"]
                 else:
                     actionlist.insert(0,"setmissionroute")
             else:
@@ -380,6 +393,23 @@ def readMapLocation():
     pyautogui.press('f10')
     time.sleep(3)
     return location
+    
+def resetMenus():
+    pyautogui.hotkey('ctrl', 'option', 'w')
+    #open station services
+    sleep(3)
+    pyautogui.moveTo(968, 429)
+    pyautogui.click()
+    pyautogui.moveTo(514, 745)
+    sleep(2)
+    pyautogui.click()
+    sleep(2)
+    pyautogui.moveTo(564, 812)
+    pyautogui.moveTo(567, 811)
+    sleep(1)
+    pyautogui.click()
+    #open agents window
+    pyautogui.hotkey('option', 'e')
 
 def generateHash(xfirst, xsecond, y):
     hash = 0
@@ -417,26 +447,6 @@ def booteve():
     pyautogui.click()
     time.sleep(120) #2 minutes to boot should be enough test
     takeScreenshot('test3')
-    #minimize launcher
-    #output('minimize launcher')
-    #pyautogui.moveTo(1318, 17)
-    #time.sleep(2)
-    #pyautogui.click()
-    #time.sleep(2)
-    #pyautogui.click()
-    #time.sleep(5)
-    #pyautogui.moveTo(996, 890)
-    #time.sleep(2)
-    #pyautogui.click()
-    #time.sleep(2)
-    #minimize chat
-    #output('closing air opportunities')
-    #pyautogui.moveTo(1105, 332)
-    #time.sleep(1)
-    #pyautogui.click()
-    #pyautogui.moveTo(1106, 331)
-    #time.sleep(2)
-    #pyautogui.click()
     output('minimize chat')
     pyautogui.moveTo(810, 693)
     time.sleep(2)
