@@ -7,6 +7,7 @@ from AppKit import NSPasteboard, NSStringPboardType
 import datetime
 import sys
 import logging
+from datetime import datetime
     
 #real resolution = 2560 × 1600 fullscreen is 2880x1800, window size is 1878x1170
 #pyautogui.position() is from 0x0 to 1439x899
@@ -23,7 +24,8 @@ def main(boot):
         booteve()
         
     output('starting mission running')
-    
+    global missioncount
+    missioncount = 0
     global docked
     docked = False
     global undocked
@@ -58,16 +60,18 @@ def main(boot):
         if (last_time - starttime) > 32400: #quit after 9 hours
             timetoquit = True
                         
-        toprightpixel = (213, 215, 216, 255)
-        toprightpixelselected = (214, 214, 214, 255)
-        if toprightpixel == screenimage.getpixel((2862,653)) or toprightpixelselected == screenimage.getpixel((2862,653)):
+        toprightpixel1 = (213, 215, 216, 255)
+        toprightpixelselected1 = (214, 214, 214, 255)
+        toprightpixel2 = (214, 216, 217, 255)
+        toprightpixelselected2 = (215, 215, 215, 255)
+        if toprightpixel1 == screenimage.getpixel((2862,653)) or toprightpixelselected1 == screenimage.getpixel((2862,653)) or toprightpixelselected2 == screenimage.getpixel((2862,653)) or toprightpixelselected2 == screenimage.getpixel((2862,653)):
             #output('you are undocked')
             undocked = True
         else:
             undocked = False
-            
+                                
         if not undocked :
-            if toprightpixel == screenimage.getpixel((2862,672)) or toprightpixelselected == screenimage.getpixel((2862,672)):
+            if toprightpixel1 == screenimage.getpixel((2862,672)) or toprightpixelselected1 == screenimage.getpixel((2862,672)) or toprightpixelselected2 == screenimage.getpixel((2862,672)) or toprightpixelselected2 == screenimage.getpixel((2862,672)):
                 #output('you are docked')
                 docked = True
             else:
@@ -89,13 +93,15 @@ def main(boot):
             sleep(1)
             pyautogui.click()
             sleep(5)
-            #minimize launcher
-            output('minimize launcher')
-            pyautogui.moveTo(1318, 17)
-            time.sleep(2)
-            pyautogui.click()
-            time.sleep(2)
-            pyautogui.click()
+            day = datetime.now().weekday()
+            if not(day == 5 or day == 6):
+                #minimize launcher
+                output('minimize launcher')
+                pyautogui.moveTo(1318, 17)
+                time.sleep(2)
+                pyautogui.click()
+                time.sleep(2)
+                pyautogui.click()
             finished = True
         else:
             #output('mouse is at position: {}'.format(pyautogui.position()))
@@ -107,7 +113,7 @@ def main(boot):
                 #output('deltat: {}'.format(deltat))
                 waittimer = waittimer-deltat
                     
-    output('finished')
+    output('finished, total missions is: {}'.format(missioncount))
         
 def nextaction():
     global waittimer
@@ -118,6 +124,7 @@ def nextaction():
     global loopedsetdestination
     global timetoquit
     global loopedwaitundocked
+    global missioncount
     
     if len(actionlist) > 0:
         currentaction = actionlist[0]
@@ -139,8 +146,10 @@ def nextaction():
                 if loopedwaitundocked > 40:
                     output('failsafe, not undocking')
                     takeScreenshot('failsafe')
+                    loopedwaitundocked = 0
                     #close the warning message in the center of the screen if there
                     if (42, 60, 70, 255) == screenimage.getpixel((1752,1338)):
+                        output('closing warning window')
                         pyautogui.moveTo(1028, 670)
                         pyautogui.moveTo(1029, 670)
                         pyautogui.click()
@@ -151,7 +160,6 @@ def nextaction():
                     actionlist = ["wait1"]
                     actionlist.insert(0,"collectcargo")
                     actionlist.insert(0,"wait5")
-                    loopedwaitundocked = 0
                 else:
                     actionlist.insert(0,"waituntilundocked")
                     actionlist.insert(0,"wait5")
@@ -172,25 +180,20 @@ def nextaction():
             pyautogui.moveTo(642, 598)
             pyautogui.click()
         elif currentaction == "collectcargo":
-            pyautogui.keyDown('optionleft')
-            pyautogui.press('c')
-            pyautogui.keyUp('optionleft')
+            pyautogui.hotkey('option', 'x')
             time.sleep(1)
-            pyautogui.keyDown('optionleft')
-            pyautogui.press('g')
-            pyautogui.keyUp('optionleft')
+            pyautogui.moveTo(900, 500)
+            pyautogui.click()
+            time.sleep(1)
+            pyautogui.hotkey('option', 'g')
             time.sleep(3)
             pyautogui.moveTo(896, 665)
             time.sleep(1)
             pyautogui.dragTo(894, 540, button='left')
             time.sleep(1)
-            pyautogui.keyDown('optionleft')
-            pyautogui.press('c')
-            pyautogui.keyUp('optionleft')
+            pyautogui.hotkey('option', 'x')
             time.sleep(1)
-            pyautogui.keyDown('optionleft')
-            pyautogui.press('g')
-            pyautogui.keyUp('optionleft')
+            pyautogui.hotkey('option', 'g')
         elif currentaction == "closeconvo":
             pyautogui.moveTo(1241, 338)
             pyautogui.click()
@@ -220,15 +223,19 @@ def nextaction():
                     actionlist.insert(1,"waituntildocked")
                     waitdockticker = waitdockticker+1
                     #output('waitdockticker: {}'.format(waitdockticker))
-            if waitdockticker > 300: #if nothing happens for some time then autopilot
-                output('failsafe engaged: unstuck with autopilot !')
-                pyautogui.keyDown('ctrl')
-                pyautogui.press('s')
-                pyautogui.keyUp('ctrl')
-                pyautogui.moveTo(1131, 489) #select fomething on the overview just to be safe
-                pyautogui.click()
-                sleep(35)
-                waitdockticker = 0
+            if waitdockticker > 300: #if nothing happens for some time check if there is a route, then autopilot
+                route = checkifrouteset()
+                if not route:
+                    actionlist.insert(0,"setdestinationagent")
+                else:
+                    output('failsafe engaged: unstuck with autopilot !')
+                    pyautogui.keyDown('ctrl')
+                    pyautogui.press('s')
+                    pyautogui.keyUp('ctrl')
+                    pyautogui.moveTo(1131, 489) #select fomething on the overview just to be safe
+                    pyautogui.click()
+                    sleep(35)
+                    waitdockticker = 0
                     
         elif currentaction == "warpnext":
             time.sleep(1)
@@ -243,6 +250,7 @@ def nextaction():
             pyautogui.keyUp('command')
             missiontitle = getClipboard()
             output('current mission is {}'.format(missiontitle))
+            missioncount = missioncount +1
         elif currentaction == "setmissionroute":
             #Currently only supporting drop-off missions
             pyautogui.moveTo(1132, 439)
@@ -276,6 +284,7 @@ def nextaction():
             pyautogui.click()
             time.sleep(1)
         elif currentaction == "warpstart":
+            loopedwaitundocked = 0
             time.sleep(1)
             pyautogui.moveTo(567, 450)
             time.sleep(1)
@@ -463,13 +472,13 @@ def waituntilevening():
     
 def checkifrouteset():
     #checking the pixels around the N of No Route
-    first = sum(screenimage.getpixel((1130,816))) - 255 #dark
-    second = sum(screenimage.getpixel((1132,816))) - 255 #white
-    third = sum(screenimage.getpixel((1134,816))) - 255 #dark
-    fourth = sum(screenimage.getpixel((1135,813))) - 255 #white
-    fifth = sum(screenimage.getpixel((1135,810))) - 255 #dark
-    sixth = sum(screenimage.getpixel((1138,810))) - 255 #white
-    seventh = sum(screenimage.getpixel((1140,810))) - 255 #dark
+    first = sum(screenimage.getpixel((1130,851))) - 255 #dark
+    second = sum(screenimage.getpixel((1132,851))) - 255 #white
+    third = sum(screenimage.getpixel((1134,851))) - 255 #dark
+    fourth = sum(screenimage.getpixel((1135,848))) - 255 #white
+    fifth = sum(screenimage.getpixel((1135,845))) - 255 #dark
+    sixth = sum(screenimage.getpixel((1138,845))) - 255 #white
+    seventh = sum(screenimage.getpixel((1140,845))) - 255 #dark
     
     if first < second and second > third and third < fourth and fourth > fifth and fifth < sixth and sixth > seventh:
         return False
